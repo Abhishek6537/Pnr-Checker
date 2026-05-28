@@ -2,5 +2,5 @@
   "name": "indian-railways-pnr",
   "version": "1.0.0",
   "description": "Indian Railways PNR Status Portal",
-  "engines": { "node": "20.x" }
+  "engines": { "node": "24.x" }
 }
