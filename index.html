@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Indian Railways — PNR Status</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--irb:#003580;--irb2:#1a63b5;--iro:#f97316;--bg:#f5f8ff;--bgw:#ffffff;--bg2:#e8f0fb;--bdr:#ccd9f0;--bdr2:#b3c9e8;--t1:#0d1f3c;--t2:#2d4a7a;--t3:#6b84ab;--t4:#96aac7;--ok:#16a34a;--okbg:#dcfce7;--er:#dc2626;--erbg:#fee2e2;--wn:#d97706;--wnbg:#fef3c7;--rc:#7c3aed;--rcbg:#ede9fe;--font:'Noto Sans',sans-serif;--mono:'Noto Sans Mono',monospace;--r:10px;--rs:6px;--sh:0 2px 12px rgba(0,53,128,.10);--shm:0 4px 24px rgba(0,53,128,.14)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100vh}
+.topbar{background:var(--irb);color:rgba(255,255,255,.8);font-size:11px;padding:5px 0;border-bottom:3px solid var(--iro);overflow:hidden;white-space:nowrap}
+.topbar marquee{display:block}
+nav{background:var(--bgw);border-bottom:1px solid var(--bdr);box-shadow:var(--sh);position:sticky;top:0;z-index:200}
+.nav-in{max-width:900px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;height:60px;gap:0}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
+.logo-box{width:42px;height:42px;background:var(--irb);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0}
+.logo-top{font-size:14px;font-weight:700;color:var(--irb)}
+.logo-bot{font-size:11px;color:var(--t3)}
+.ndiv{width:1px;height:34px;background:var(--bdr);margin:0 16px;flex-shrink:0}
+.ntabs{display:flex;height:60px}
+.ntab{padding:0 14px;font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.ntab:hover{color:var(--irb);background:var(--bg2)}
+.ntab.on{color:var(--irb);border-bottom-color:var(--iro);font-weight:600}
+.nbadge{margin-left:auto;background:var(--bg2);color:var(--irb);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid var(--bdr2)}
+.hero{background:linear-gradient(135deg,#002a6e,#003580 55%,#1a4fa0);padding:24px 1rem 0;overflow:hidden;position:relative}
+.hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 40px)}
+.hero-in{max-width:900px;margin:0 auto;position:relative;z-index:1}
+.hero-eye{font-size:11px;color:rgba(255,255,255,.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.hero-h{font-size:clamp(20px,3vw,32px);font-weight:700;color:#fff;margin-bottom:6px}
+.hero-h span{color:#fbbf24}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.65);margin-bottom:18px}
+.stabs{display:flex;border-radius:8px 8px 0 0;overflow:hidden;width:max-content}
+.stab{padding:9px 18px;font-size:12px;font-weight:500;color:rgba(255,255,255,.6);cursor:pointer;border:none;background:rgba(0,0,0,.25);transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.stab:hover{color:rgba(255,255,255,.9)}
+.stab.on{background:var(--bgw);color:var(--irb);font-weight:600;border-radius:8px 8px 0 0}
+.scard{background:var(--bgw);border-radius:0 8px 8px 8px;padding:14px;box-shadow:var(--shm)}
+.sp{display:none}.sp.on{display:block}
+.srow{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px}
+.fg label{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select{height:40px;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:0 11px;font-family:var(--font);font-size:14px;color:var(--t1);background:var(--bg);outline:none;transition:border .15s}
+.fg input:focus,.fg select:focus{border-color:var(--irb);background:#fff}
+.pnr-inp{font-family:var(--mono)!important;font-size:16px!important;font-weight:700!important;letter-spacing:2px!important}
+.go-btn{height:40px;padding:0 22px;background:var(--iro);color:#fff;border:none;border-radius:var(--rs);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0;transition:opacity .15s,transform .1s}
+.go-btn:hover{opacity:.88}.go-btn:active{transform:scale(.97)}
+.sbar{font-size:12px;margin-top:8px;min-height:18px}
+.sl{color:var(--t3);display:flex;align-items:center;gap:6px}
+.se{color:var(--er);display:flex;align-items:center;gap:5px}
+.so{color:var(--ok);display:flex;align-items:center;gap:5px}
+@keyframes sp2{to{transform:rotate(360deg)}}
+.spn{width:12px;height:12px;border:1.5px solid var(--bdr2);border-top-color:var(--irb);border-radius:50%;animation:sp2 .7s linear infinite;flex-shrink:0}
+.wave{display:block;width:100%;height:22px;background:var(--bg)}
+.main{max-width:900px;margin:0 auto;padding:1.2rem 1rem 3rem}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.rc{background:var(--bgw);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:12px;overflow:hidden;box-shadow:var(--sh);animation:fu .3s ease both}
+.rc:nth-child(1){animation-delay:.04s}.rc:nth-child(2){animation-delay:.08s}.rc:nth-child(3){animation-delay:.12s}.rc:nth-child(4){animation-delay:.16s}.rc:nth-child(5){animation-delay:.20s}
+.rch{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr);cursor:pointer;user-select:none}
+.rch:hover{background:var(--bdr2)}
+.rch-ic{width:28px;height:28px;border-radius:6px;background:var(--irb);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.rch-t{font-size:11px;font-weight:700;color:var(--irb);text-transform:uppercase;letter-spacing:.8px;flex:1}
+.chv{color:var(--t3);transition:transform .2s;font-size:18px;line-height:1}
+.collapsed .chv{transform:rotate(-90deg)}
+.rcb{padding:16px}.rcb.p0{padding:0}
+.pnr-top{background:linear-gradient(90deg,#002a6e,#1a4fa0);padding:14px 18px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px}
+.pl{font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.pnr-n{font-family:var(--mono);font-size:22px;font-weight:700;color:#fff;letter-spacing:3px}
+.pnr-d{font-size:15px;font-weight:600;color:#fff}
+.train-row{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:8px}
+.tnm{font-size:16px;font-weight:700;color:var(--irb)}
+.tno{font-size:11px;color:var(--t3);font-family:var(--mono);margin-top:2px}
+.tpill{display:inline-flex;align-items:center;gap:3px;background:var(--wnbg);color:var(--wn);border:1px solid #fcd34d;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+.cls-chip{background:var(--bg2);color:var(--irb);border:1px solid var(--bdr2);font-size:11px;font-weight:700;padding:4px 12px;border-radius:6px}
+.jbar{display:flex;align-items:center;padding:15px 18px;border-bottom:1px solid var(--bdr)}
+.jst{flex:0 0 auto}.jst.r{text-align:right}
+.jtime{font-size:26px;font-weight:700;font-family:var(--mono);color:var(--irb)}
+.jname{font-size:12px;color:var(--t2);margin-top:3px;font-weight:500}
+.jcode{font-size:10px;color:var(--t4);font-family:var(--mono);margin-top:1px}
+.jmid{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0 14px}
+.jline{width:100%;height:2px;background:var(--bdr2);position:relative}
+.jline::before,.jline::after{content:'';position:absolute;top:-5px;width:12px;height:12px;border-radius:50%;background:var(--irb)}
+.jline::before{left:0}.jline::after{right:0}
+.jdur{font-size:11px;color:var(--t3);font-weight:500}
+.meta-row{display:grid;grid-template-columns:repeat(3,1fr)}
+.mc{padding:10px 18px}.mc+.mc{border-left:1px solid var(--bdr)}
+.mlab{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.mval{font-size:12px;font-weight:600;color:var(--t1)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+table th{font-size:10px;font-weight:700;color:var(--irb);text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;border-bottom:2px solid var(--irb);text-align:left;background:var(--bg2);white-space:nowrap}
+table td{padding:9px 12px;border-bottom:1px solid var(--bdr);color:var(--t1);vertical-align:middle}
+table tr:last-child td{border-bottom:none}
+table tr.cur td{background:#fffbeb;border-left:3px solid var(--iro)}
+table tr:hover td{background:var(--bg)}
+.snm{font-weight:600;color:var(--irb);font-size:12px}
+.scd{font-size:10px;color:var(--t3);font-family:var(--mono)}
+.hb{font-size:10px;font-family:var(--mono);background:var(--bg2);color:var(--t2);padding:2px 6px;border-radius:4px;border:1px solid var(--bdr)}
+.sdep{color:var(--ok);font-size:11px;font-weight:600}
+.senr{color:var(--wn);font-size:11px;font-weight:700}
+.ssch{color:var(--t3);font-size:11px}
+.rw{padding:16px 18px}
+.rscr{overflow-x:auto;padding-bottom:6px}
+.rtrack{position:relative;min-width:400px;padding:4px 0 0}
+.rbg{height:3px;background:var(--bdr2);margin:10px 10px 0;border-radius:2px;position:relative}
+.rprog{height:100%;background:var(--irb);border-radius:2px}
+.rstops{display:flex;justify-content:space-between;margin-top:-13px;position:relative}
+.rstop{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:0}
+.rdot{width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid var(--bdr2);position:relative;z-index:2;flex-shrink:0}
+.rdot.org{background:var(--irb);border-color:var(--irb);width:15px;height:15px}
+.rdot.dst{background:var(--ok);border-color:var(--ok);width:15px;height:15px}
+.rdot.psd{background:var(--irb2);border-color:var(--irb2)}
+.rdot.now{background:var(--iro);border-color:var(--iro);width:14px;height:14px;box-shadow:0 0 0 3px rgba(249,115,22,.2)}
+.rlbl{font-size:9px;color:var(--t3);font-family:var(--mono);text-align:center;line-height:1.2;max-width:46px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.rleg{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px}
+.rl{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)}
+.rld{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.rkg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ri{background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rs);padding:11px 13px;border-top:2.5px solid var(--irb)}
+.ri label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.ri span{font-size:13px;font-weight:700;color:var(--t1)}
+.scnf{color:var(--ok);font-weight:700;font-size:12px}
+.swl{color:var(--er);font-weight:700;font-size:12px}
+.srac{color:var(--rc);font-weight:700;font-size:12px}
+.cbdg{background:var(--bg2);color:var(--irb);border:1px solid var(--bdr2);font-size:11px;font-weight:700;font-family:var(--mono);padding:2px 8px;border-radius:4px}
+.botstrip{display:flex;align-items:stretch;border-top:1.5px solid var(--bdr);flex-wrap:wrap}
+.farc{flex:1;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;min-width:160px}
+.farl{font-size:13px;color:var(--t2)}
+.fara{font-size:22px;font-weight:700;color:var(--irb);font-family:var(--mono)}
+.chrc{flex:1;padding:12px 18px;background:var(--bg2);display:flex;align-items:center;justify-content:space-between;min-width:160px;border-left:1px solid var(--bdr)}
+.cyes{color:var(--ok);font-size:12px;font-weight:700}
+.cno{color:var(--wn);font-size:12px;font-weight:700}
+.remk{margin:10px 14px 14px;padding:11px 13px;background:var(--erbg);border:1px solid #fca5a5;border-left:4px solid var(--er);border-radius:var(--rs);font-size:12px;color:var(--er);display:flex;gap:9px;line-height:1.6}
+.avgg{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:8px}
+.avc{background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rs);padding:8px 10px;text-align:center;border-top:2.5px solid var(--irb)}
+.avd{font-size:10px;color:var(--t3);margin-bottom:3px}
+.avs{font-size:12px;font-weight:700}
+.ava{color:var(--ok)}.avw{color:var(--er)}.avr{color:var(--rc)}
+.liinfo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.lic{border-radius:var(--rs);padding:10px 12px;border-left:2.5px solid var(--irb)}
+.lil{font-size:10px;color:var(--t3);margin-bottom:3px}
+.liv{font-size:13px;font-weight:700;color:var(--irb)}
+.empty{text-align:center;padding:3rem 1rem;color:var(--t3)}
+.eico{font-size:48px;margin-bottom:14px}
+.etit{font-size:17px;font-weight:700;color:var(--t2);margin-bottom:7px}
+.esub{font-size:13px;line-height:1.8}
+footer{background:var(--irb);color:rgba(255,255,255,.65);text-align:center;padding:1.5rem 1rem;font-size:11px;margin-top:1rem}
+footer .ft{font-size:15px;font-weight:700;color:#fff;margin-bottom:5px}
+footer a{color:rgba(255,255,255,.45);text-decoration:none}
+.ftl{display:flex;justify-content:center;gap:18px;margin-top:8px;flex-wrap:wrap}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
+@media(max-width:600px){
+  .meta-row{grid-template-columns:1fr 1fr}
+  .rkg{grid-template-columns:1fr 1fr}
+  .liinfo{grid-template-columns:1fr}
+  .jbar{flex-direction:column;gap:10px}
+  .jmid{width:100%}
+  .jst.r{text-align:left}
+  .botstrip{flex-direction:column}
+  .chrc{border-left:none;border-top:1px solid var(--bdr)}
+  .ntabs{display:none}
+  .stabs{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <marquee scrollamount="3">🚆 Welcome to Indian Railways PNR Portal &nbsp;|&nbsp; Helpline: 139 &nbsp;|&nbsp; Book tickets: irctc.co.in &nbsp;|&nbsp; Real-time PNR · Schedule · Passenger Status &nbsp;|&nbsp; Jai Hind 🇮🇳</marquee>
+</div>
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="#">
+      <div class="logo-box">🚂</div>
+      <div><div class="logo-top">Indian Railways</div><div class="logo-bot">Ministry of Railways, Govt. of India</div></div>
+    </a>
+    <div class="ndiv"></div>
+    <div class="ntabs">
+      <button class="ntab on" onclick="swN('pnr',this)">🎫 PNR Status</button>
+      <button class="ntab" onclick="swN('live',this)">📡 Live Status</button>
+      <button class="ntab" onclick="swN('avail',this)">💺 Seat Availability</button>
+    </div>
+    <div class="nbadge" style="margin-left:auto">🔴 LIVE</div>
+  </div>
+</nav>
+<div class="hero">
+  <div class="hero-in">
+    <div class="hero-eye">🇮🇳 Indian Railways — Real-time Enquiry</div>
+    <div class="hero-h">PNR &amp; Train Status <span>Portal</span></div>
+    <div class="hero-sub">Live PNR · Schedule · Passenger Coach Position · Seat Availability · Rake Info</div>
+    <div class="stabs">
+      <button class="stab on" id="st-pnr" onclick="swT('pnr',this)">🎫 PNR Status</button>
+      <button class="stab" id="st-live" onclick="swT('live',this)">📡 Live Train</button>
+      <button class="stab" id="st-avail" onclick="swT('avail',this)">💺 Availability</button>
+    </div>
+    <div class="scard">
+      <div class="sp on" id="tab-pnr">
+        <div class="srow">
+          <div class="fg" style="max-width:260px">
+            <label>PNR Number</label>
+            <input class="pnr-inp" type="text" id="pnrIn" maxlength="10" placeholder="Enter 10-digit PNR" inputmode="numeric" autocomplete="off"/>
+          </div>
+          <button class="go-btn" onclick="doPNR()">🔍 Get PNR Status</button>
+        </div>
+        <div class="sbar" id="pnrSbar"></div>
+      </div>
+      <div class="sp" id="tab-live">
+        <div class="srow">
+          <div class="fg" style="max-width:180px"><label>Train Number</label><input type="text" id="liveTno" maxlength="5" placeholder="e.g. 12951" inputmode="numeric"/></div>
+          <div class="fg" style="max-width:160px"><label>Date</label><input type="date" id="liveDt"/></div>
+          <button class="go-btn" onclick="doLive()">🔍 Get Live Status</button>
+        </div>
+        <div class="sbar" id="liveSbar"></div>
+      </div>
+      <div class="sp" id="tab-avail">
+        <div class="srow">
+          <div class="fg" style="max-width:130px"><label>Train No</label><input type="text" id="avTno" maxlength="5" placeholder="12471" inputmode="numeric"/></div>
+          <div class="fg" style="max-width:90px"><label>From</label><input type="text" id="avFr" maxlength="5" placeholder="RJT"/></div>
+          <div class="fg" style="max-width:90px"><label>To</label><input type="text" id="avTo" maxlength="5" placeholder="SC"/></div>
+          <div class="fg" style="max-width:140px"><label>Date</label><input type="date" id="avDt"/></div>
+          <div class="fg" style="max-width:80px"><label>Class</label>
+            <select id="avCls"><option value="SL">SL</option><option value="3A">3A</option><option value="2A">2A</option><option value="1A">1A</option><option value="CC">CC</option><option value="2S">2S</option></select>
+          </div>
+          <button class="go-btn" onclick="doAvail()">🔍 Check</button>
+        </div>
+        <div class="sbar" id="avSbar"></div>
+      </div>
+    </div>
+  </div>
+  <svg class="wave" viewBox="0 0 900 22" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path fill="#f5f8ff" d="M0,22 C225,0 675,0 900,22 L900,22 L0,22 Z"/></svg>
+</div>
+<div class="main" id="out">
+  <div class="empty">
+    <div class="eico">🚂</div>
+    <div class="etit">Enter a PNR number above</div>
+    <div class="esub">Complete ticket details, live train schedule,<br/>passenger coach position, route map &amp; rake info<br/>will appear here instantly.</div>
+  </div>
+</div>
+<footer>
+  <div class="ft">🚂 Indian Railways PNR &amp; Train Status Portal</div>
+  <div>Powered by IRCTC via RapidAPI &nbsp;·&nbsp; Live data from Indian Railways &nbsp;·&nbsp; Helpline: 139</div>
+  <div class="ftl">
+    <a href="https://www.irctc.co.in" target="_blank">IRCTC</a>
+    <a href="https://enquiry.indianrail.gov.in" target="_blank">National Train Enquiry</a>
+    <a href="https://rapidapi.com" target="_blank">RapidAPI</a>
+  </div>
+</footer>
+<script>
+// ── CONFIG — API calls go to OUR backend, key is hidden from users ──
+// When deployed on Vercel: /api/pnr?pnr=XXXXXXXXXX
+// For local testing, change BASE_URL to your Vercel deployment URL
+const BASE_URL = '';  // empty = same domain (works on Vercel automatically)
+
+// ── INIT ────────────────────────────────────────────
+const td = new Date().toISOString().split('T')[0];
+document.getElementById('liveDt').value = td;
+document.getElementById('avDt').value   = td;
+document.getElementById('pnrIn').addEventListener('keydown', e=>{ if(e.key==='Enter') doPNR(); });
+
+// ── TAB SWITCH ──────────────────────────────────────
+function swT(id,btn){
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.sp').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('tab-'+id).classList.add('on');
+}
+function swN(id,btn){
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('st-'+id)?.click();
+}
+
+// ── STATUS BAR ──────────────────────────────────────
+function bar(id,type,msg){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(type==='l') el.innerHTML=`<div class="sl"><div class="spn"></div>${msg}</div>`;
+  else if(type==='e') el.innerHTML=`<div class="se">⚠ ${msg}</div>`;
+  else if(type==='o'){el.innerHTML=`<div class="so">✓ ${msg}</div>`;setTimeout(()=>el.innerHTML='',3000);}
+  else el.innerHTML='';
+}
+
+// ── HELPERS ─────────────────────────────────────────
+function gv(obj){return function(...ks){for(const k of ks){if(obj&&obj[k]!==undefined&&obj[k]!==null&&String(obj[k]).trim()!=='')return obj[k];}return '—';};}
+function cn(c){const m={'SL':'Sleeper','3A':'AC 3 Tier','2A':'AC 2 Tier','1A':'AC First Class','CC':'AC Chair Car','EC':'Exec Chair Car','2S':'2nd Sitting','GN':'General','3E':'3 Tier Economy'};return m[(c||'').toUpperCase()]||c||'—';}
+function ff(f){const n=Number(String(f||'').replace(/[^\d.]/g,''));return isNaN(n)||n===0?'—':'₹'+n.toLocaleString('en-IN');}
+
+// ── BACKEND API CALL ─────────────────────────────────
+async function backendCall(endpoint){
+  const r = await fetch(BASE_URL + endpoint);
+  const d = await r.json();
+  if(!r.ok || d.success === false){
+    throw new Error(d.message || `Error ${r.status}`);
+  }
+  return d.data || d;
+}
+
+// ── PNR ─────────────────────────────────────────────
+async function doPNR(){
+  const pnr=document.getElementById('pnrIn').value.trim();
+  if(!/^\d{10}$/.test(pnr)){bar('pnrSbar','e','Please enter a valid 10-digit PNR number.');return;}
+  bar('pnrSbar','l','Fetching live PNR data from Indian Railways…');
+  document.getElementById('out').innerHTML='';
+  try{
+    const d = await backendCall(`/api/pnr?pnr=${pnr}`);
+    bar('pnrSbar','o','PNR data fetched successfully!');
+    document.getElementById('out').innerHTML=buildPNR(d,pnr);
+  }catch(err){
+    bar('pnrSbar','e',err.message);
+    document.getElementById('out').innerHTML=errHTML(err.message);
+  }
+}
+
+// ── LIVE ─────────────────────────────────────────────
+async function doLive(){
+  const tn=document.getElementById('liveTno').value.trim();
+  const dt=document.getElementById('liveDt').value;
+  if(!/^\d{4,5}$/.test(tn)){bar('liveSbar','e','Enter a valid 4–5 digit train number.');return;}
+  bar('liveSbar','l','Fetching live running status…');
+  document.getElementById('out').innerHTML='';
+  try{
+    const d=await backendCall(`/api/live?train=${tn}&date=${dt}`);
+    bar('liveSbar','o','Live status fetched!');
+    document.getElementById('out').innerHTML=buildLive(d,tn,dt);
+  }catch(err){bar('liveSbar','e',err.message);document.getElementById('out').innerHTML=errHTML(err.message);}
+}
+
+// ── AVAILABILITY ─────────────────────────────────────
+async function doAvail(){
+  const tn=document.getElementById('avTno').value.trim();
+  const fr=document.getElementById('avFr').value.trim().toUpperCase();
+  const to=document.getElementById('avTo').value.trim().toUpperCase();
+  const dt=document.getElementById('avDt').value;
+  const cl=document.getElementById('avCls').value;
+  if(!tn||!fr||!to||!dt){bar('avSbar','e','Please fill all fields.');return;}
+  bar('avSbar','l','Checking seat availability…');
+  document.getElementById('out').innerHTML='';
+  try{
+    const d=await backendCall(`/api/availability?train=${tn}&from=${fr}&to=${to}&class=${cl}&date=${dt}`);
+    bar('avSbar','o','Availability data fetched!');
+    document.getElementById('out').innerHTML=buildAvail(d,tn,fr,to,cl);
+  }catch(err){bar('avSbar','e',err.message);document.getElementById('out').innerHTML=errHTML(err.message);}
+}
+
+// ── BUILD PNR UI ──────────────────────────────────────
+function buildPNR(d,raw){
+  const v=gv(d);
+  const pnr=v('PnrNumber','pnrNumber')!=='—'?v('PnrNumber','pnrNumber'):raw;
+  const tNo=v('TrainNumber','trainNumber','TrainNo');
+  const tNm=v('TrainName','trainName');
+  const fStn=v('SourceStationName','BoardingStationName','boardingStationName');
+  const fCd=v('SourceStationCode','BoardingStationCode','boardingStationCode');
+  const tStn=v('DestinationStationName','destinationStationName','ReservationUptoName');
+  const tCd=v('DestinationStationCode','destinationStationCode','ReservationUptoCode');
+  const bStn=v('BoardingStationName','SourceStationName');
+  const bCd=v('BoardingStationCode','SourceStationCode');
+  const uStn=v('ReservationUptoName','ReservationUpto','DestinationStationName');
+  const uCd=v('ReservationUptoCode','DestinationStationCode');
+  const doj=v('DateOfJourney','dateOfJourney','Doj');
+  const dep=v('DepartureTime','departureTime','DepTime');
+  const arr=v('ArrivalTime','arrivalTime','ArrTime');
+  const cls=v('Class','class','ClassCode');
+  const fare=v('TotalFare','totalFare','Fare');
+  const quota=(v('Quota','quota','QuotaCode')||'').toUpperCase();
+  const chart=!!(d.ChartPrepared||d.chartPrepared||(typeof d.ChartStatus==='string'&&d.ChartStatus.toLowerCase().includes('prepared')));
+  const isTK=quota==='TQ'||quota==='TATKAL';
+  const pax=d.PassengerList||d.passengerList||d.Passengers||d.passengers||[];
+  const sched=d.TrainRoute||d.trainRoute||d.Schedule||d.schedule||d.RouteList||d.routeList||[];
+  const rake=d.RakeInfo||d.rakeInfo||{};
+  const showR=chart||isTK;
+  const tkB=isTK?`<span class="tpill">⚡ Tatkal</span>`:'';
+
+  let schR='';
+  if(sched.length){sched.forEach((s,i)=>{
+    const sv=gv(s);
+    const nm=sv('StationName','stationName','Station');
+    const cd=sv('StationCode','stationCode','Code');
+    const sa=sv('ArrivalTime','arrivalTime','Arrival')!=='—'?sv('ArrivalTime','arrivalTime','Arrival'):(i===0?'Source':'—');
+    const sd=sv('DepartureTime','departureTime','Departure')!=='—'?sv('DepartureTime','departureTime','Departure'):(i===sched.length-1?'Dest':'—');
+    const sh=sv('HaltTime','haltTime','Halt');
+    const dst=Number(sv('Distance','distance','Km','DistanceFromSource')||0);
+    const iC=!!(s.IsCurrentStation||s.isCurrentStation||s.CurrentStation);
+    const iD=!iC&&(s.DayCount<0||s.ActualArrivalTime||s.actualArrivalTime);
+    const rc2=iC?' class="cur"':'';
+    const st=iC?`<span class="senr">▶ En Route</span>`:iD?`<span class="sdep">✓ Departed</span>`:`<span class="ssch">Scheduled</span>`;
+    schR+=`<tr${rc2}><td><div class="snm">${nm}</div><div class="scd">${cd}</div></td><td>${sa}</td><td>${sd}</td><td><span class="hb">${sh}</span></td><td style="font-size:11px;color:var(--t3);font-family:var(--mono)">${dst>0?dst+' km':'—'}</td><td>${st}</td></tr>`;
+  });}else{schR=`<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:18px">Schedule not available</td></tr>`;}
+
+  let psd=0;let rdots='';
+  if(sched.length){sched.forEach((s,i)=>{
+    const cd=s.StationCode||s.stationCode||s.Code||'?';
+    const iC=!!(s.IsCurrentStation||s.isCurrentStation||s.CurrentStation);
+    const iD=!iC&&(s.DayCount<0||s.ActualArrivalTime||s.actualArrivalTime);
+    if(iD)psd++;
+    const first=i===0,last=i===sched.length-1;
+    const dc=first?'org':last?'dst':iC?'now':iD?'psd':'';
+    rdots+=`<div class="rstop"><div class="rdot ${dc}"></div><div class="rlbl">${cd}</div></div>`;
+  });}
+  const prog=sched.length>1?Math.round((psd/(sched.length-1))*100):0;
+
+  let paxR='';
+  if(pax.length){pax.forEach((p,i)=>{
+    const pv=gv(p);
+    const bk=pv('BookingStatus','bookingStatus','CurrentStatus');
+    const cur=pv('CurrentStatus','currentStatus','BookingStatus');
+    const coach=p.CoachPosition||p.coachPosition||p.Coach||p.coach||null;
+    const seat=p.BerthNumber||p.berthNumber||p.SeatNumber||p.seatNumber||null;
+    const isW=(cur||'').toUpperCase().includes('WL')&&!(cur||'').toUpperCase().includes('CNF');
+    const isR=(cur||'').toUpperCase().includes('RAC');
+    const isC=!isW&&!isR;
+    const sc=isW?'swl':isR?'srac':'scnf';
+    const cc=(isC||isR)&&coach?`<span class="cbdg">${coach}${seat?' / '+seat:''}</span>`:`<span style="color:var(--t4);font-size:11px">—</span>`;
+    paxR+=`<tr><td style="color:var(--t3);font-weight:600">${i+1}</td><td><span class="${sc}">${bk}</span></td><td><span class="${sc}">${cur}</span></td><td>${cc}</td></tr>`;
+  });}else{paxR=`<tr><td colspan="4" style="text-align:center;color:var(--t3);padding:18px">Passenger data not available</td></tr>`;}
+
+  const rt=rake.RakeType||rake.rakeType||rake.Type||'N/A';
+  const rl=rake.LocoType||rake.locoType||rake.Loco||'N/A';
+  const rc3=rake.Coaches||rake.coaches||rake.Count||'N/A';
+  const ro=rake.Origin||rake.origin||'—';
+  const rp=rake.PantryCar||rake.pantryCar||'—';
+  const rs=rake.MaxSpeed||rake.maxSpeed||'—';
+
+  return `
+<div class="rc">
+  <div class="rch" onclick="tog(this)"><div class="rch-ic">🎫</div><span class="rch-t">PNR Details</span><span class="chv">›</span></div>
+  <div class="rcb" style="padding:0">
+    <div class="pnr-top">
+      <div><div class="pl">PNR Number</div><div class="pnr-n">${pnr}</div></div>
+      <div style="text-align:right"><div class="pl">Date of Journey</div><div class="pnr-d">${doj}</div></div>
+    </div>
+    <div class="train-row">
+      <div><div class="tnm">${tNm}${tkB}</div><div class="tno">Train No: ${tNo}</div></div>
+      <div class="cls-chip">${cls} — ${cn(cls)}</div>
+    </div>
+    <div class="jbar">
+      <div class="jst"><div class="jtime">${dep}</div><div class="jname">${fStn}</div><div class="jcode">${fCd}</div></div>
+      <div class="jmid"><div class="jline"></div><div class="jdur">🚂 Journey</div></div>
+      <div class="jst r"><div class="jtime">${arr}</div><div class="jname">${tStn}</div><div class="jcode">${tCd}</div></div>
+    </div>
+    <div class="meta-row">
+      <div class="mc"><div class="mlab">Boarding</div><div class="mval">${bStn} (${bCd})</div></div>
+      <div class="mc"><div class="mlab">Reserved Upto</div><div class="mval">${uStn} (${uCd})</div></div>
+      <div class="mc"><div class="mlab">Class</div><div class="mval">${cls} — ${cn(cls)}</div></div>
+    </div>
+  </div>
+</div>
+<div class="rc">
+  <div class="rch" onclick="tog(this)"><div class="rch-ic">🕐</div><span class="rch-t">Train Schedule</span><span class="chv">›</span></div>
+  <div class="rcb p0"><div class="tw"><table>
+    <thead><tr><th>Station</th><th>Arrival</th><th>Departure</th><th>Halt</th><th>Distance</th><th>Status</th></tr></thead>
+    <tbody>${schR}</tbody>
+  </table></div></div>
+</div>
+<div class="rc">
+  <div class="rch" onclick="tog(this)"><div class="rch-ic">🗺️</div><span class="rch-t">Route Map</span><span class="chv">›</span></div>
+  <div class="rcb p0"><div class="rw">
+    <div class="rscr"><div class="rtrack">
+      <div class="rbg"><div class="rprog" style="width:${prog}%"></div></div>
+      <div class="rstops">${rdots||'<span style="color:var(--t3);font-size:12px;padding:8px">Route not available</span>'}</div>
+    </div></div>
+    <div class="rleg">
+      <div class="rl"><div class="rld" style="background:var(--irb)"></div>Origin</div>
+      <div class="rl"><div class="rld" style="background:var(--irb2)"></div>Passed</div>
+      <div class="rl"><div class="rld" style="background:var(--iro)"></div>Current</div>
+      <div class="rl"><div class="rld" style="background:var(--ok)"></div>Destination</div>
+      <div class="rl"><div class="rld" style="background:var(--bdr2)"></div>Upcoming</div>
+    </div>
+  </div></div>
+</div>
+<div class="rc">
+  <div class="rch" onclick="tog(this)"><div class="rch-ic">🚃</div><span class="rch-t">Rake Information</span><span class="chv">›</span></div>
+  <div class="rcb"><div class="rkg">
+    <div class="ri"><label>Rake Type</label><span>${rt}</span></div>
+    <div class="ri"><label>Loco Type</label><span>${rl}</span></div>
+    <div class="ri"><label>Total Coaches</label><span>${rc3}</span></div>
+    <div class="ri"><label>Rake Origin</label><span>${ro}</span></div>
+    <div class="ri"><label>Pantry Car</label><span>${rp}</span></div>
+    <div class="ri"><label>Max Speed</label><span>${rs}</span></div>
+  </div></div>
+</div>
+<div class="rc">
+  <div class="rch" onclick="tog(this)"><div class="rch-ic">👥</div><span class="rch-t">Passenger Details</span><span class="chv">›</span></div>
+  <div class="rcb p0">
+    <div class="tw"><table>
+      <thead><tr><th>Sr No</th><th>Booking Status</th><th>Current Status</th><th>Coach / Seat</th></tr></thead>
+      <tbody>${paxR}</tbody>
+    </table></div>
+    <div class="botstrip">
+      <div class="farc"><span class="farl">₹ Total Fare</span><span class="fara">${ff(fare)}</span></div>
+      <div class="chrc">
+        <span style="font-size:12px;color:var(--t3)">Charting Status</span>
+        ${chart?`<span class="cyes">✓ Chart Prepared</span>`:`<span class="cno">⏳ Chart Not Prepared</span>`}
+      </div>
+    </div>
+    ${showR?`<div class="remk">⚠️ <span><strong>Remarks:</strong> No refund against cancellation${isTK?' — Tatkal ticket. No cancellation refund applicable as per IRCTC Tatkal policy.':'. Chart prepared. Cancellation not permitted.'}</span></div>`:''}
+  </div>
+</div>`;
+}
+
+// ── BUILD LIVE UI ─────────────────────────────────────
+function buildLive(d,tn,dt){
+  const v=gv(d);
+  const tNm=v('TrainName','trainName');
+  const cs=v('CurrentStation','currentStation','CurrentStationName');
+  const cc=v('CurrentStationCode','currentStationCode');
+  const dl=v('DelayTime','delayTime','Delay','delay');
+  const up=v('LastUpdated','lastUpdated','UpdatedAt');
+  const sched=d.TrainRoute||d.trainRoute||d.Schedule||d.schedule||[];
+  let rows='';
+  if(sched.length){sched.forEach((s,i)=>{
+    const sv=gv(s);
+    const nm=sv('StationName','stationName');const cd=sv('StationCode','stationCode','Code');
+    const sa=sv('ArrivalTime','arrivalTime')!=='—'?sv('ArrivalTime','arrivalTime'):(i===0?'Source':'—');
+    const sd=sv('DepartureTime','departureTime')!=='—'?sv('DepartureTime','departureTime'):(i===sched.length-1?'Dest':'—');
+    const aa=sv('ActualArrivalTime','actualArrivalTime');
+    const ad=sv('ActualDepartureTime','actualDepartureTime');
+    const iC=!!(s.IsCurrentStation||s.isCurrentStation);
+    const iD=!iC&&(s.DayCount<0||s.ActualArrivalTime);
+    const rc2=iC?' class="cur"':'';
+    const st=iC?`<span class="senr">▶ En Route</span>`:iD?`<span class="sdep">✓ Departed</span>`:`<span class="ssch">Upcoming</span>`;
+    rows+=`<tr${rc2}><td><div class="snm">${nm}</div><div class="scd">${cd}</div></td><td>${sa}</td><td>${sd}</td><td style="color:var(--ok);font-size:11px">${aa}</td><td style="color:var(--ok);font-size:11px">${ad}</td><td>${st}</td></tr>`;
+  });}else{rows=`<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:18px">Live data not available</td></tr>`;}
+  const onT=dl==='0'||dl==='—'||(dl||'').toLowerCase().includes('on time');
+  return `<div class="rc">
+  <div class="rch" onclick="tog(this)"><div class="rch-ic">📡</div><span class="rch-t">Live Train Status — ${tn}</span><span style="margin-left:auto;margin-right:8px;display:inline-flex;align-items:center;gap:4px;background:var(--erbg);color:var(--er);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid #fca5a5"><span style="width:5px;height:5px;border-radius:50%;background:var(--er);animation:sp2 1.2s ease infinite"></span>LIVE</span><span class="chv">›</span></div>
+  <div class="rcb">
+    <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bdr)"><div class="tnm">${tNm}</div><div class="tno">Train No: ${tn} | Date: ${dt}</div></div>
+    <div class="liinfo">
+      <div class="lic" style="background:var(--bg2)"><div class="lil">Current Station</div><div class="liv">${cs} (${cc})</div></div>
+      <div class="lic" style="background:${onT?'var(--okbg)':'var(--erbg)'};border-left-color:${onT?'var(--ok)':'var(--er)'}"><div class="lil">Delay</div><div class="liv" style="color:${onT?'var(--ok)':'var(--er)'}">${onT?'On Time':dl}</div></div>
+      <div class="lic" style="background:var(--bg)"><div class="lil">Last Updated</div><div class="liv">${up}</div></div>
+    </div>
+  </div>
+</div>
+<div class="rc">
+  <div class="rch" onclick="tog(this)"><div class="rch-ic">🕐</div><span class="rch-t">Live Schedule with Actual Times</span><span class="chv">›</span></div>
+  <div class="rcb p0"><div class="tw"><table>
+    <thead><tr><th>Station</th><th>Sch Arrival</th><th>Sch Dep</th><th>Actual Arrival</th><th>Actual Dep</th><th>Status</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div></div>
+</div>`;
+}
+
+// ── BUILD AVAIL UI ────────────────────────────────────
+function buildAvail(d,tn,fr,to,cl){
+  const v=gv(d);const tNm=v('TrainName','trainName');
+  const avl=d.Availability||d.availability||d.AvailabilityList||d.availabilityList||[];
+  let cells='';
+  if(avl.length){avl.forEach(a=>{
+    const av=gv(a);
+    const dt=av('Date','date','JourneyDate','journeyDate');
+    const st=av('AvailabilityStatus','availabilityStatus','Status','status');
+    const iA=(st||'').toUpperCase().includes('AVAIL');
+    const iW=(st||'').toUpperCase().includes('WL');
+    const iR=(st||'').toUpperCase().includes('RAC');
+    const sc=iA?'ava':iW?'avw':iR?'avr':'';
+    cells+=`<div class="avc"><div class="avd">${dt}</div><div class="avs ${sc}">${st}</div></div>`;
+  });}else{cells=`<div style="color:var(--t3);font-size:12px;padding:8px 0;grid-column:1/-1">No availability data returned.</div>`;}
+  return `<div class="rc">
+  <div class="rch" onclick="tog(this)"><div class="rch-ic">💺</div><span class="rch-t">Seat Availability — ${tn} | ${fr}→${to} | ${cl}</span><span class="chv">›</span></div>
+  <div class="rcb">
+    <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bdr)"><div class="tnm">${tNm||tn}</div><div class="tno">${fr} → ${to} | ${cl} — ${cn(cl)}</div></div>
+    <div style="display:flex;gap:14px;margin-bottom:10px;font-size:11px;flex-wrap:wrap">
+      <span style="color:var(--ok);font-weight:600">■ Available</span>
+      <span style="color:var(--er);font-weight:600">■ Waitlist</span>
+      <span style="color:var(--rc);font-weight:600">■ RAC</span>
+    </div>
+    <div class="avgg">${cells}</div>
+  </div>
+</div>`;
+}
+
+// ── ERROR ─────────────────────────────────────────────
+function errHTML(msg){
+  return `<div class="empty"><div class="eico">⚠️</div><div class="etit">Could not fetch data</div><div class="esub">${msg}<br/><br/>Please check your input and try again.<br/>Make sure your RapidAPI subscription is active at <a href="https://rapidapi.com/hub" target="_blank" style="color:var(--irb)">rapidapi.com</a>.</div></div>`;
+}
+
+// ── COLLAPSE ──────────────────────────────────────────
+function tog(h){
+  const card=h.closest('.rc');
+  const body=card.querySelector('.rcb');
+  const col=card.classList.toggle('collapsed');
+  body.style.display=col?'none':'';
+}
+</script>
+</body>
+</html>
